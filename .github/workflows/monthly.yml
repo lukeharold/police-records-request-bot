@@ -9,6 +9,10 @@ on:
         description: 'Print the requests without sending'
         type: boolean
         default: true
+      check_login:
+        description: 'Only test the Gmail password (sends nothing)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write          # to commit sent_log.csv
@@ -28,7 +32,9 @@ jobs:
         env:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "${{ inputs.check_login }}" = "true" ]; then
+            python request.py --check-login
+          elif [ "${{ inputs.dry_run }}" = "true" ]; then
             python request.py --dry-run
           else
             python request.py

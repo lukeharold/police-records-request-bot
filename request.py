@@ -74,7 +74,22 @@ def send_email(to, subject, body):
     return msg["Message-ID"]
 
 
+def check_login():
+    if not GMAIL_APP_PASSWORD:
+        sys.exit("Login check failed: GMAIL_APP_PASSWORD is empty")
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(SEND_FROM, GMAIL_APP_PASSWORD)
+    except smtplib.SMTPAuthenticationError as e:
+        sys.exit(f"Login check failed: Gmail rejected the app password - {e}")
+    print(f"Login check passed: Gmail accepted the app password for {SEND_FROM}. Nothing was sent.")
+
+
 def main():
+    if "--check-login" in sys.argv:
+        check_login()
+        return
+
     dry_run = "--dry-run" in sys.argv
 
     today = datetime.now(ZoneInfo("America/Los_Angeles")).date()

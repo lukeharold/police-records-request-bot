@@ -9,7 +9,8 @@ Emails a California Public Records Act request to LAPD and LASD on the 1st of ev
 ## Setup
 
 1. Add the `GMAIL_APP_PASSWORD` repo secret
-2. Run the workflow manually with "dry run" checked to preview
+2. Run the workflow manually with "check login" checked to test the password
+3. Run it with "dry run" checked to preview the letters
 
 ## Local preview
 
