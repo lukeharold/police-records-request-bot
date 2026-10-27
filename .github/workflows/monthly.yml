@@ -1,0 +1,47 @@
+name: Monthly Records Requests
+
+on:
+  schedule:
+    - cron: '0 16 1 * *'  # 1st of every month, 9am PDT / 8am PST
+  workflow_dispatch:       # allows manual trigger from GitHub
+    inputs:
+      dry_run:
+        description: 'Print the requests without sending'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write          # to commit sent_log.csv
+
+jobs:
+  send-requests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Send records requests
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python request.py --dry-run
+          else
+            python request.py
+          fi
+
+      # Committing the log also keeps the repo active, so GitHub
+      # doesn't disable this schedule after 60 days of no commits.
+      - name: Commit sent log
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sent_log.csv 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "Log records requests sent $(date -u +%Y-%m-%d)"
+          git push
